@@ -26,7 +26,7 @@ In Anaconda Prompt, type the following (replacing the path to FSCT and your desi
 
 ```shell
 cd PATH_TO_FSCT-MAIN_DIRECTORY
-conda create --name YOUR_ENVIRONMENT_NAME_HERE python==3.9
+conda create --name YOUR_ENVIRONMENT_NAME_HERE python==3.10
 conda activate YOUR_ENVIRONMENT_NAME_HERE
 conda install pip
 pip install -r requirements.txt
