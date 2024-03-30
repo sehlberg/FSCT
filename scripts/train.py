@@ -6,7 +6,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch_geometric.data import DataLoader
+from torch_geometric.loader import DataLoader
 import glob
 import random
 import threading
