@@ -1,7 +1,8 @@
 from abc import ABC
 import torch
 import torch_geometric
-from torch_geometric.data import Dataset, DataLoader, Data
+from torch_geometric.data import Dataset, Data
+from torch_geometric.loader import DataLoader
 import numpy as np
 import glob
 import pandas as pd
@@ -19,10 +20,10 @@ import sys
 sys.setrecursionlimit(10**8)  # Can be necessary for dealing with large point clouds.
 
 
-class TestingDataset(Dataset, ABC):
+class TestingDataset(Dataset):
     def __init__(self, root_dir, points_per_box, device):
         super().__init__()
-        self.filenames = glob.glob(root_dir + "*.npy")
+        self.filenames = glob.glob(f"{root_dir}*.npy")
         self.device = device
         self.points_per_box = points_per_box
 
@@ -32,13 +33,12 @@ class TestingDataset(Dataset, ABC):
     def __getitem__(self, index):
         point_cloud = np.load(self.filenames[index])
         pos = point_cloud[:, :3]
-        pos = torch.from_numpy(pos.copy()).type(torch.float).to(self.device).requires_grad_(False)
-
-        # Place sample at origin
-        local_shift = torch.round(torch.mean(pos[:, :3], axis=0)).requires_grad_(False)
-        pos = pos - local_shift
-        data = Data(pos=pos, x=None, local_shift=local_shift)
-        return data
+        pos = torch.tensor(pos, dtype=torch.float, device=self.device)
+        
+        # Centering sample at origin
+        local_shift = torch.mean(pos, dim=0)
+        pos -= local_shift
+        return Data(pos=pos, x=None, local_shift=local_shift)
 
 
 def choose_most_confident_label(point_cloud, original_point_cloud):
@@ -67,29 +67,22 @@ def choose_most_confident_label(point_cloud, original_point_cloud):
 
 class SemanticSegmentation:
     def __init__(self, parameters):
-        self.sem_seg_start_time = time.time()
         self.parameters = parameters
-
-        if not self.parameters["use_CPU_only"]:
-            print("Is CUDA available?", torch.cuda.is_available())
-            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        else:
-            self.device = torch.device("cpu")
-
-        print("Performing inference on device:", self.device)
-        if not torch.cuda.is_available():
-            print("Please be aware that inference will be much slower on CPU. An Nvidia GPU is highly recommended.")
+        self.device = torch.device("cuda" if torch.cuda.is_available() and not self.parameters["use_CPU_only"] else "cpu")
+        print(f"Performing inference on device: {self.device}")
+        
         self.filename = self.parameters["point_cloud_filename"].replace("\\", "/")
-        self.directory = os.path.dirname(os.path.realpath(self.filename)).replace("\\", "/") + "/"
-        self.filename = self.filename.split("/")[-1]
-        self.output_dir = self.directory + self.filename[:-4] + "_FSCT_output/"
-        self.working_dir = self.directory + self.filename[:-4] + "_FSCT_output/working_directory/"
+        self.directory = os.path.dirname(os.path.realpath(self.filename)) + "/"
+        self.filename = os.path.basename(self.filename)
+        self.output_dir = f"{self.directory}{self.filename[:-4]}_FSCT_output/"
+        self.working_dir = f"{self.output_dir}working_directory/"
 
-        self.filename = "working_point_cloud.las"
-        self.directory = self.output_dir
-        self.plot_summary = pd.read_csv(self.output_dir + "plot_summary.csv", index_col=None)
-        self.plot_centre = [[float(self.plot_summary["Plot Centre X"]), float(self.plot_summary["Plot Centre Y"])]]
-
+        self.plot_summary = pd.read_csv(f"{self.output_dir}plot_summary.csv")
+        # Use iloc[0] to access the first item when converting to float.
+        self.plot_centre = [
+            [float(self.plot_summary["Plot Centre X"].iloc[0]), 
+             float(self.plot_summary["Plot Centre Y"].iloc[0])]
+        ]
     def inference(self):
         test_dataset = TestingDataset(
             root_dir=self.working_dir, points_per_box=self.parameters["max_points_per_box"], device=self.device
