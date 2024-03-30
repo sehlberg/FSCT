@@ -28,14 +28,14 @@ class ReportWriter:
         self.plot_summary = pd.read_csv(self.output_dir + "plot_summary.csv", index_col=False)
 
         self.parameters["plot_centre"] = [
-            float(self.plot_summary["Plot Centre X"]),
-            float(self.plot_summary["Plot Centre X"]),
+            float(self.plot_summary["Plot Centre X"].iloc[0]),
+            float(self.plot_summary["Plot Centre Y"].iloc[0]),
         ]
 
-        self.plot_area = float(self.plot_summary["Plot Area"])
-        self.stems_per_ha = int(self.plot_summary["Stems/ha"])
-        self.parameters["plot_radius"] = float(self.plot_summary["Plot Radius"])
-        self.parameters["plot_radius_buffer"] = float(self.plot_summary["Plot Radius Buffer"])
+        self.plot_area = float(self.plot_summary["Plot Area"].iloc[0])
+        self.stems_per_ha = int(self.plot_summary["Stems/ha"].iloc[0])
+        self.parameters["plot_radius"] = float(self.plot_summary["Plot Radius"].iloc[0])
+        self.parameters["plot_radius_buffer"] = float(self.plot_summary["Plot Radius Buffer"].iloc[0])
 
         self.tree_data = pd.read_csv(self.output_dir + "tree_data.csv")
         self.TreeId = np.array(self.tree_data["TreeId"])
@@ -126,7 +126,7 @@ class ReportWriter:
             mdFile.new_header(level=level, title="Stems/ha: 0")
             mdFile.new_header(level=level, title="No stems found.")
 
-        total_processing_time = float(self.plot_summary["Total Run Time (s)"])
+        total_processing_time = float(self.plot_summary["Total Run Time (s)"].iloc[0])
 
         mdFile.new_header(
             level=level, title="FSCT Processing Time: " + str(np.around(total_processing_time / 60.0, 1)) + " minutes"
