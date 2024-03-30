@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 from torch_geometric.nn import knn_interpolate
 from torch.nn import Sequential as Seq, Linear as Lin, ReLU, BatchNorm1d as BN
-from torch_geometric.nn import PointConv, fps, radius, global_max_pool
+from torch_geometric.nn import PointNetConv, fps, radius, global_max_pool
 
 
 class SAModule(torch.nn.Module):
@@ -10,7 +10,7 @@ class SAModule(torch.nn.Module):
         super(SAModule, self).__init__()
         self.ratio = ratio
         self.r = r
-        self.conv = PointConv(NN)
+        self.conv = PointNetConv(NN)
 
     def forward(self, x, pos, batch):
         idx = fps(pos, batch, ratio=self.ratio)
