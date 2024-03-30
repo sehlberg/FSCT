@@ -43,12 +43,7 @@ class MeasureTree:
         self.measure_time_start = time.time()
         self.parameters = parameters
         self.filename = self.parameters["point_cloud_filename"].replace("\\", "/")
-        self.output_dir = (
-            os.path.dirname(os.path.realpath(self.filename)).replace("\\", "/")
-            + "/"
-            + self.filename.split("/")[-1][:-4]
-            + "_FSCT_output/"
-        )
+        self.output_dir = os.path.dirname(os.path.realpath(self.filename)).replace("\\", "/") + "/" + self.filename.split("/")[-1][:-4] + "_FSCT_output/"
         self.filename = self.filename.split("/")[-1]
 
         self.num_cpu_cores = parameters["num_cpu_cores"]
@@ -57,9 +52,11 @@ class MeasureTree:
         self.slice_increment = parameters["slice_increment"]
 
         self.plot_summary = pd.read_csv(self.output_dir + "plot_summary.csv", index_col=False)
-        self.parameters["plot_radius"] = float(self.plot_summary["Plot Radius"])
-        self.parameters["plot_radius_buffer"] = float(self.plot_summary["Plot Radius Buffer"])
-        self.plot_area = float(self.plot_summary["Plot Area"])
+        # Update these lines to use .iloc[0] for accessing Series elements
+        self.parameters["plot_radius"] = float(self.plot_summary["Plot Radius"].iloc[0])
+        self.parameters["plot_radius_buffer"] = float(self.plot_summary["Plot Radius Buffer"].iloc[0])
+        self.plot_area = float(self.plot_summary["Plot Area"].iloc[0])
+        
         self.stem_points, headers_of_interest = load_file(
             self.output_dir + "stem_points.las",
             headers_of_interest=["x", "y", "z", "red", "green", "blue", "label", "height_above_DTM"],
@@ -1147,7 +1144,7 @@ class MeasureTree:
 
         tree_data = np.zeros((0, 16))
         radial_tree_aware_plot_cropping = False
-        plot_centre = [[float(self.plot_summary["Plot Centre X"]), float(self.plot_summary["Plot Centre Y"])]]
+        plot_centre = [[float(self.plot_summary["Plot Centre X"].iloc[0]), float(self.plot_summary["Plot Centre Y"].iloc[0])]]
 
         stem_points_sorted = np.zeros((0, len(list(self.stem_dict))))
         veg_points_sorted = np.zeros((0, len(list(self.veg_dict))))
