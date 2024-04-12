@@ -17,7 +17,7 @@ from scipy import spatial
 
 def get_fsct_path(location_in_fsct=""):
     current_working_dir = os.getcwd()
-    return current_working_dir + "/content/FSCT/" + location_in_fsct
+    return current_working_dir + "/FSCT/" + location_in_fsct
     output_path = current_working_dir[: current_working_dir.index("FSCT") + 4]
     if len(location_in_fsct) > 0:
         output_path = os.path.join(output_path, location_in_fsct)
