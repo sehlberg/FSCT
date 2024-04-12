@@ -67,6 +67,7 @@ def choose_most_confident_label(point_cloud, original_point_cloud):
 
 class SemanticSegmentation:
     def __init__(self, parameters):
+        self.sem_seg_start_time = time.time()
         self.parameters = parameters
         self.device = torch.device("cuda" if torch.cuda.is_available() and not self.parameters["use_CPU_only"] else "cpu")
         print(f"Performing inference on device: {self.device}")
