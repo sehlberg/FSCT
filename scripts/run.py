@@ -13,8 +13,8 @@ if __name__ == "__main__":
     If you have multiple point clouds and wish to enter plot coords for each, have a look at "run_with_multiple_plot_centres.py"
     """
     # point_clouds_to_process = directory_mode()
-    # point_clouds_to_process = ['full_path_to_your_point_cloud.las', 'full_path_to_your_second_point_cloud.las', etc.]
-    point_clouds_to_process = file_mode()
+    point_clouds_to_process = ['FSCT/data/train/example.las']
+    #point_clouds_to_process = file_mode()
 
     for point_cloud_filename in point_clouds_to_process:
         parameters = dict(
