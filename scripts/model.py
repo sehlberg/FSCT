@@ -84,3 +84,14 @@ class Net(torch.nn.Module):
         x = self.conv2(x)
         x = F.log_softmax(x, dim=1)
         return x
+
+if __name__ == "__main__":
+    def count_parameters(model):
+        return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+    # Instantiate the model
+    model = Net(num_classes=10)  # replace 10 with your number of classes
+
+    # Calculate the number of trainable parameters
+    num_trainable_params = count_parameters(model)
+    print(f"The model has {num_trainable_params} trainable parameters.")
